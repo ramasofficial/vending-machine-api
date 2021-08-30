@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\VendingMachineController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +17,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::prefix('vending-machine')->group(function () {
+    Route::get('/balance/{id}', [VendingMachineController::class, 'balance']);
+    Route::post('/balance/add/{id}', [VendingMachineController::class, 'add']);
+    Route::post('/refund/{id}', [VendingMachineController::class, 'refund']);
+    Route::post('/select-product/{id}', [VendingMachineController::class, 'select']);
 });
