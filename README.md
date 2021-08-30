@@ -10,6 +10,28 @@ Implemented methods:
 Original task:
 https://github.com/TDD-Katas/vending-machine
 
+# Project installation
+1. Clone repository
+```
+git clone https://github.com/ramasofficial/vending-machine-api.git
+```
+
+2. Install composer
+```
+composer install
+```
+
+3. Copy .env.example file and specify database settings
+```
+cp .env.example .env
+```
+then run:
+```
+php artisan migrate
+```
+
+4. Create vending machine to database table: <strong>vending_machines</strong> and then create products for the vending machine to <strong>vending_machine_products</strong> table.
+
 # Specify header settings
 ```
 Accept: application/json
