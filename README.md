@@ -32,12 +32,13 @@ php artisan migrate
 
 4. Create vending machine to database table: <strong>vending_machines</strong> and then create products for the vending machine to <strong>vending_machine_products</strong> table.
 
-# Specify header settings
+# API
+## Specify header settings
 ```
 Accept: application/json
 ```
 
-# Get balance
+## Get balance
 ```
 GET YOUR_URL/api/vending-machine/balance/{vending_machine_id}
 ```
@@ -49,7 +50,7 @@ Response:
 }
 ```
 
-# Add balance
+## Add balance
 ```
 POST YOUR_URL/api/vending-machine/balance/add/{vending_machine_id}
 ```
@@ -69,7 +70,7 @@ Response:
 }
 ```
 
-# Take refund
+## Take refund
 ```
 GET YOUR_URL/api/vending-machine/refund/{vending_machine_id}
 ```
@@ -82,7 +83,7 @@ Response:
 }
 ```
 
-# Select product by pences
+## Select product by pences
 ```
 POST YOUR_URL/api/vending-machine/select-product/{vending_machine_id}
 ```
