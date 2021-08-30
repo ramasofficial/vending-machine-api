@@ -22,6 +22,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('vending-machine')->group(function () {
     Route::get('/balance/{id}', [VendingMachineController::class, 'balance']);
     Route::post('/balance/add/{id}', [VendingMachineController::class, 'add']);
-    Route::post('/refund/{id}', [VendingMachineController::class, 'refund']);
+    Route::get('/refund/{id}', [VendingMachineController::class, 'refund']);
     Route::post('/select-product/{id}', [VendingMachineController::class, 'select']);
 });
