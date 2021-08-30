@@ -83,6 +83,39 @@ Response:
 }
 ```
 
+## Get products
+```
+GET YOUR_URL/api/vending-machine/products/{vending_machine_id}
+```
+
+Response:
+```
+{
+    "products": [
+        {
+            "name": "CANDY",
+            "price_in_pences": 10
+        },
+        {
+            "name": "SNACKS",
+            "price_in_pences": 50
+        },
+        {
+            "name": "NUTS",
+            "price_in_pences": 75
+        },
+        {
+            "name": "BOTTLE OF WATER",
+            "price_in_pences": 100
+        },
+        {
+            "name": "COKE",
+            "price_in_pences": 150
+        }
+    ]
+}
+```
+
 ## Select product by pences
 ```
 POST YOUR_URL/api/vending-machine/select-product/{vending_machine_id}
