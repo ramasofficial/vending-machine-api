@@ -23,5 +23,6 @@ Route::prefix('vending-machine')->group(function () {
     Route::get('/balance/{id}', [VendingMachineController::class, 'balance']);
     Route::post('/balance/add/{id}', [VendingMachineController::class, 'add']);
     Route::get('/refund/{id}', [VendingMachineController::class, 'refund']);
+    Route::get('/products/{id}', [VendingMachineController::class, 'products']);
     Route::post('/select-product/{id}', [VendingMachineController::class, 'select']);
 });

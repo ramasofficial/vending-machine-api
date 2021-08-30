@@ -59,6 +59,19 @@ class VendingMachineController extends Controller
         ]);
     }
 
+    public function products(Request $request): JsonResponse
+    {
+        $products = VendingMachineProduct::where('vending_machine_id', $request->id)->oldest('price_in_pences')->get(['name', 'price_in_pences']);
+
+        if($products->isEmpty()) {
+            return $this->errorResponse();
+        }
+
+        return response()->json([
+            'products' => $products
+        ]);
+    }
+
     public function select(SelectProductRequest $request): JsonResponse
     {
         $pences = $request->pence;
