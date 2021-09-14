@@ -6,62 +6,72 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AddBalanceRequest;
 use App\Http\Requests\SelectProductRequest;
 use App\Models\VendingMachine;
-use App\Models\VendingMachineProduct;
+use App\Services\VendingMachine\Commands\AddBalanceCommand;
+use App\Services\VendingMachine\Commands\GetBalanceCommand;
+use App\Services\VendingMachine\Commands\GetProductsCommand;
+use App\Services\VendingMachine\Commands\RefundCommand;
+use App\Services\VendingMachine\Commands\SelectProductCommand;
+use App\Services\VendingMachine\Repositories\VendingMachineProductRepository;
+use App\Services\VendingMachine\Repositories\VendingMachineRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class VendingMachineController extends Controller
 {
-    private const ZERO_BALANCE = 0;
+    private VendingMachineRepository $vendingMachineRepository;
+
+    private VendingMachineProductRepository $vendingMachineProductRepository;
+
+    public function __construct(VendingMachineRepository $vendingMachineRepository, VendingMachineProductRepository $vendingMachineProductRepository)
+    {
+        $this->vendingMachineRepository = $vendingMachineRepository;
+        $this->vendingMachineProductRepository = $vendingMachineProductRepository;
+    }
 
     public function balance(Request $request): JsonResponse
     {
-        $vendingMachine = $this->getVendingMachine($request->id);
+        $balanceCommand = new GetBalanceCommand($this->vendingMachineRepository);
+        $balance = $balanceCommand->execute($request->id);
 
         return response()->json([
-            'balance' => $vendingMachine->balance,
+            'balance' => $balance,
         ]);
     }
 
     public function add(AddBalanceRequest $request): JsonResponse
     {
-        $vendingMachine = $this->getVendingMachine($request->id);
+        $addBalanceCommand = new AddBalanceCommand($this->vendingMachineRepository);
+        $add = $addBalanceCommand->execute($request->id, $request->amount);
 
-        $newBalance = $vendingMachine->balance + $request->amount;
-
-        $update = $this->updateBalance($vendingMachine, $newBalance);
-
-        if(!$update) {
+        if(!$add) {
             return $this->errorResponse();
         }
 
         return response()->json([
-            'balance' => $newBalance,
+            'balance' => $add['balance'],
             'currency' => VendingMachine::PENCES,
         ]);
     }
 
     public function refund(Request $request): JsonResponse
     {
-        $vendingMachine = $this->getVendingMachine($request->id);
+        $refundCommand = new RefundCommand($this->vendingMachineRepository);
+        $refund = $refundCommand->execute($request->id);
 
-        $balance = $vendingMachine->balance;
-
-        $update = $this->updateBalance($vendingMachine, self::ZERO_BALANCE);
-
-        if(!$update) {
+        if(!$refund) {
             return $this->errorResponse();
         }
 
         return response()->json([
-            'refund' => $balance,
+            'refund' => $refund['refund'],
             'currency' => VendingMachine::PENCES,
         ]);
     }
 
     public function products(Request $request): JsonResponse
     {
-        $products = VendingMachineProduct::where('vending_machine_id', $request->id)->oldest('price_in_pences')->get(['name', 'price_in_pences']);
+        $getProductsCommand = new GetProductsCommand($this->vendingMachineProductRepository);
+        $products = $getProductsCommand->execute($request->id);
 
         if($products->isEmpty()) {
             return $this->errorResponse();
@@ -74,39 +84,17 @@ class VendingMachineController extends Controller
 
     public function select(SelectProductRequest $request): JsonResponse
     {
-        $pences = $request->pence;
+        $selectProductCommand = new SelectProductCommand($this->vendingMachineRepository, $this->vendingMachineProductRepository);
+        $selectProduct = $selectProductCommand->execute($request->id, $request->pence);
 
-        $vendingMachine = $this->getVendingMachine($request->id);
-        $product = VendingMachineProduct::where('price_in_pences', $pences)->firstOrFail();
-
-        if(!$this->haveEnoughBalance($vendingMachine->balance, $product->price_in_pences)) {
-            return response()->json([
-                'error' => 'Your balance is lower than product price, insert the money and try again.'
-            ]);
-        }
-
-        $newBalance = $vendingMachine->balance - $product->price_in_pences;
-
-        $update = $this->updateBalance($vendingMachine, $newBalance);
-
-        if(!$update) {
+        if(!$selectProduct) {
             return $this->errorResponse();
         }
 
         return response()->json([
-            'selected_product' => $product->name,
-            'current_balance' => $newBalance,
+            'selected_product' => $selectProduct['selected_product'],
+            'current_balance' => $selectProduct['balance'],
         ]);
-    }
-
-    private function getVendingMachine(int $id): VendingMachine
-    {
-        return VendingMachine::findOrFail($id);
-    }
-
-    private function updateBalance(VendingMachine $vendingMachine, int $newBalance): bool
-    {
-        return $vendingMachine->update(['balance' => $newBalance]);
     }
 
     private function errorResponse(): JsonResponse
@@ -114,10 +102,5 @@ class VendingMachineController extends Controller
         return response()->json([
             'error' => 'Something wrong with vending machine, try again later.'
         ]);
-    }
-
-    private function haveEnoughBalance(int $balance, int $productPrice): bool
-    {
-        return $balance >= $productPrice;
     }
 }

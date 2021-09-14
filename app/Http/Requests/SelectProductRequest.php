@@ -4,6 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @property int id
+ * @property int pence
+ */
 class SelectProductRequest extends FormRequest
 {
     /**
